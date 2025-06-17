@@ -20,6 +20,9 @@ for qa in train_data:
     question = qa['qa_pairs'][0]['question']
     answer = qa['qa_pairs'][0]['answer']
 
+    if not answer:
+        continue
+
     conversations = [
         {
             "from": "human",
