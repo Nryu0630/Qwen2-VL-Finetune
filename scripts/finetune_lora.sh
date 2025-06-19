@@ -6,6 +6,8 @@
 MODEL_NAME="Qwen/Qwen2.5-VL-3B-Instruct"
 # MODEL_NAME="Qwen/Qwen2.5-VL-7B-Instruct"
 
+export NCCL_P2P_DISABLE=1          # 关闭 GPU‑P2P
+export NCCL_IB_DISABLE=1           # 关闭 InfiniBand
 export PYTHONPATH=src:$PYTHONPATH
 
 GLOBAL_BATCH_SIZE=128
@@ -26,8 +28,8 @@ deepspeed src/train/train_sft.py \
     --num_lora_modules -1 \
     --deepspeed scripts/zero3_offload.json \
     --model_id $MODEL_NAME \
-    --data_path /path/to/your/training/data.json \
-    --image_folder /path/to/your/image/folder \
+    --data_path /home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/lora_data_origin.json \
+    --image_folder /home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/origin/train \
     --remove_unused_columns False \
     --freeze_vision_tower False \
     --freeze_llm True \

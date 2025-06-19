@@ -1,15 +1,17 @@
 import torch
 from transformers import AutoProcessor
 from peft import PeftModel, PeftConfig
-from transformers import Qwen2VLForConditionalGeneration  # 或 Qwen2_5_VL...
-                     # ^ 这里用你训练脚本里相同的基座模型类
+from transformers import Qwen2VLForConditionalGeneration, Qwen2_5_VLForConditionalGeneration 
+from PIL import Image
+# 或 Qwen2_5_VL...
+# ^ 这里用你训练脚本里相同的基座模型类
 
 # ===== 路径 =====
-base_model_id = "Qwen/Qwen2-VL-Chat"      # 你的基座模型（跟训练时 --model_id 一样）
-adapter_dir   = "./Qwen2-VL-Finetune/output/testing_lora"  # 上图文件夹
+base_model_id = "Qwen/Qwen2.5-VL-3B-Instruct"      # 你的基座模型（跟训练时 --model_id 一样）
+adapter_dir   = "./output/testing_lora"  # 上图文件夹
 
 # 1) 基座模型先 load（可用 bfloat16/fp16 加速）
-base_model = Qwen2VLForConditionalGeneration.from_pretrained(
+base_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     base_model_id,
     torch_dtype=torch.bfloat16,
     device_map="auto"
@@ -30,12 +32,30 @@ processor = AutoProcessor.from_pretrained(adapter_dir)
 
 # ===== 准备一条验证样例 =====
 sample = {
-    "image": "path/to/val_img.jpg",
-    "text" : "给这张图写一句简介。"
+    "image": "./v2/images/origin/validation/1.png",
+    "text" : "<image>What is the total amount on this invoice in the image?"
 }
 
-inputs = processor(images=sample["image"],
-                   text   =sample["text"],
+message = [
+  {
+      "role": "user",
+      "content": [
+          {"type": "image"},
+          {"type": "text", "text": "What is the total amount on this invoice in the image?"},
+      ],
+  }
+]
+text = processor.apply_chat_template(
+   message,
+   tokenize=False,  # 不立即 tokenize
+   add_generation_prompt=True  # 添加助手生成提示
+)
+
+# 打开图像
+img = Image.open(sample["image"]).convert("RGB")
+
+inputs = processor(images=img,
+                   text   =text,
                    return_tensors="pt").to(model.device)
 
 with torch.no_grad():
