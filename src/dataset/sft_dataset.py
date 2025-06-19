@@ -201,7 +201,7 @@ class SupervisedValidationDataset(Dataset):
         model_id,
         padding=True,
     ):
-        super(SupervisedDataset, self).__init__()
+        super(SupervisedValidationDataset, self).__init__()
         if isinstance(data_path, str):
             list_data_dict = json.load(open(data_path, "r"))
         else:
@@ -432,5 +432,5 @@ def make_supervised_data_module(model_id, processor, data_args):
 
     return dict(train_dataset=sft_dataset,
                 eval_dataset=validation_dataset,
-                eval_dataset=None,
+#                eval_dataset=None,
                 data_collator=data_collator)

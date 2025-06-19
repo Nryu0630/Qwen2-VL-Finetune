@@ -31,14 +31,14 @@ deepspeed src/train/train_sft.py \
     --data_path /home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/lora_data_origin.json \
     --image_folder /home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/origin/train \
     --remove_unused_columns False \
-    --freeze_vision_tower False \
+    --freeze_vision_tower True \
     --freeze_llm True \
     --freeze_merger False \
     --bf16 True \
     --fp16 False \
     --disable_flash_attn2 False \
     --output_dir output/testing_lora \
-    --num_train_epochs 1 \
+    --num_train_epochs 10 \
     --per_device_train_batch_size $BATCH_PER_DEVICE \
     --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
     --image_min_pixels $((256 * 28 * 28)) \
@@ -54,7 +54,13 @@ deepspeed src/train/train_sft.py \
     --gradient_checkpointing True \
     --report_to tensorboard \
     --lazy_preprocess True \
-    --save_strategy "steps" \
-    --save_steps 200 \
+    --save_strategy "epoch" \
     --save_total_limit 10 \
-    --dataloader_num_workers 4
+    --dataloader_num_workers 4 \
+    --eval_strategy "epoch" \
+    --validation_data_path /home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/lora_data_origin_val.json \
+    --validation_image_folder /home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/origin/validation \
+    --eval_accumulation_steps 4 \
+    --eval_steps 0 \
+    --per_device_eval_batch_size 4 \
+    --do_eval True
