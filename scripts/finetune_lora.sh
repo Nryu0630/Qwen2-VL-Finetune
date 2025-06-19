@@ -63,4 +63,7 @@ deepspeed src/train/train_sft.py \
     --eval_accumulation_steps 4 \
     --eval_steps 0 \
     --per_device_eval_batch_size 4 \
-    --do_eval True
+    --do_eval True \
+    --predict_with_generate True \
+    --generation_max_new_tokens 128 \
+    --generation_num_beams 1

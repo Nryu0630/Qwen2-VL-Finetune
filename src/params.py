@@ -62,9 +62,9 @@ class TrainingArguments(HFSeq2SeqTrainingArguments):
         default=False,
         metadata={"help": "Whether to use generate to calculate generative metrics (e.g., exact match)."}
     )
-    generation_max_length: int = field(
+    generation_max_new_tokens: int = field(
         default=128,
-        metadata={"help": "The maximum length of the sequence to be generated."}
+        metadata={"help": "Number of new tokens to generate during evaluation."}
     )
     generation_num_beams: int = field(
         default=1,

@@ -10,6 +10,7 @@ from train.train_utils import get_peft_state_maybe_zero_3, get_peft_state_non_lo
 import pathlib
 from liger_kernel.transformers import apply_liger_kernel_to_qwen2_vl, apply_liger_kernel_to_qwen2_5_vl
 from monkey_patch_forward import replace_qwen2_5_with_mixed_modality_forward, replace_qwen_2_with_mixed_modality_forward
+import numpy as np
 
 local_rank = None
 
@@ -55,6 +56,15 @@ def configure_llm(model, training_args):
 
     llm_params = model.model.parameters()
     set_requires_grad(llm_params, not training_args.freeze_llm)
+
+def extract_assistant_answer(text: str) -> str:
+    """
+    从生成文本中提取 assistant 的回答部分。
+    假设格式是: system\n...user\n...assistant\n<回答>
+    """
+    if "assistant\n" in text:
+        return text.split("assistant\n", 1)[1].strip()
+    return text.strip()
 
 def train():
     global local_rank
@@ -178,19 +188,29 @@ def train():
                     param.requires_grad = True
 
     processor = AutoProcessor.from_pretrained(model_args.model_id)
+    processor.tokenizer.padding_side = "left" # 设置 side
 
     # model.config.tokenizer_model_max_length = processor.tokenizer.model_max_length
     def compute_metrics(eval_preds):
         predictions, labels = eval_preds
         tokenizer = processor.tokenizer
 
+        # 有些模型会 pad 为 -100，要替换成 pad_token_id 再 decode
+        predictions = np.where(predictions < 0, tokenizer.pad_token_id, predictions)
+        labels = np.where(labels < 0, tokenizer.pad_token_id, labels)
+
         # 解码
         pred_strs = tokenizer.batch_decode(predictions, skip_special_tokens=True)
         label_strs = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
+#        for pred, label in zip(pred_strs, label_strs):
+#            print(f"PRED:  {repr(pred.strip())}")
+#            print(f"LABEL: {repr(label.strip())}")
+#            print("-----")
+
         # 对每一对预测和真实进行完全匹配比较
         exact_matches = [
-            int(pred.strip() == label.strip())
+            int(extract_assistant_answer(pred) == label.strip())
             for pred, label in zip(pred_strs, label_strs)
         ]
 
