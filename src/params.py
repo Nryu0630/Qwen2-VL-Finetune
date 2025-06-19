@@ -57,6 +57,18 @@ class TrainingArguments(HFTrainingArguments):
     lora_namespan_exclude: str = field(default=None, metadata={"help": "List of namespan to exclude for LoRA"})
     num_lora_modules: int = -1
     use_liger: bool = True
+    predict_with_generate: bool = field(
+        default=False,
+        metadata={"help": "Whether to use generate to calculate generative metrics (e.g., exact match)."}
+    )
+    generation_max_length: int = field(
+        default=128,
+        metadata={"help": "The maximum length of the sequence to be generated."}
+    )
+    generation_num_beams: int = field(
+        default=1,
+        metadata={"help": "Number of beams to use for evaluation."}
+    )
 
 @dataclass
 class DPOArguments(DPOConfigTRL):
