@@ -56,7 +56,6 @@ def configure_llm(model, training_args):
     llm_params = model.model.parameters()
     set_requires_grad(llm_params, not training_args.freeze_llm)
 
-
 def train():
     global local_rank
 
@@ -181,6 +180,25 @@ def train():
     processor = AutoProcessor.from_pretrained(model_args.model_id)
 
     # model.config.tokenizer_model_max_length = processor.tokenizer.model_max_length
+    def compute_metrics(eval_preds):
+        predictions, labels = eval_preds
+        tokenizer = processor.tokenizer
+
+        # 解码
+        pred_strs = tokenizer.batch_decode(predictions, skip_special_tokens=True)
+        label_strs = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+        # 对每一对预测和真实进行完全匹配比较
+        exact_matches = [
+            int(pred.strip() == label.strip())
+            for pred, label in zip(pred_strs, label_strs)
+        ]
+
+        acc = sum(exact_matches) / len(exact_matches)
+
+        return {
+            "exact_match_accuracy": acc
+        }
 
     if training_args.bits in [4, 8]:
         from peft.tuners.lora import LoraLayer
@@ -204,6 +222,7 @@ def train():
         model=model,
         processing_class=processor,
         args=training_args,
+        compute_metrics=compute_metrics, 
         **data_module
     )
 
