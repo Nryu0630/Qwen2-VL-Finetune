@@ -175,6 +175,10 @@ class DataArguments:
     )
     lazy_preprocess: bool = False
     image_folder: Optional[str] = field(default=None)
+    validation_data_path: str = field(
+        default=None, metadata={"help": "Path to the validation data."}
+    )
+    validation_image_folder: Optional[str] = field(default=None)
     image_min_pixels: Optional[int] = field(default=3136)
     image_max_pixels: Optional[int] = field(default=12845056)
     video_min_pixels: Optional[int] = field(default=100352)
