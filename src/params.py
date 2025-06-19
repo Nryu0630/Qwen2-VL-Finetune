@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from transformers import TrainingArguments as HFTrainingArguments
+from transformers import Seq2SeqTrainingArguments as HFSeq2SeqTrainingArguments
 from trl import DPOConfig as DPOConfigTRL
 from trl import GRPOConfig as GRPOConfigTRL
 
@@ -12,7 +13,7 @@ class ModelArguments:
 
 
 @dataclass
-class TrainingArguments(HFTrainingArguments):
+class TrainingArguments(HFSeq2SeqTrainingArguments):
     cache_dir: Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")
     adam_beta1: float = field(default=0.9)
