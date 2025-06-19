@@ -2,7 +2,7 @@ import os
 import torch
 import torch.nn as nn
 
-from transformers import Trainer
+from transformers import Trainer, Seq2SeqTrainer
 from transformers.trainer import (
     is_sagemaker_mp_enabled,
     get_parameter_names,
@@ -29,7 +29,7 @@ def maybe_zero_3(param, ignore_status=False, name=None):
         param = param.detach().cpu().clone()
     return param
 
-class QwenSFTTrainer(Trainer):
+class QwenSFTTrainer(Seq2SeqTrainer):
 
     def __init__(self, *args, **kwargs):
         super(QwenSFTTrainer, self).__init__(*args, **kwargs)
