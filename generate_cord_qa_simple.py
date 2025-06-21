@@ -36,12 +36,32 @@ q1_filter_categories = {
 }
 
 def is_price_string(s):
-    # 去除前后空格
+    """
+    判断字符串是否是价格。
+    规则：
+        1. 允许可选的货币前缀：
+           - 符号：$, ¥, €, £ 等
+           - 缩写：Rp, RM, IDR 等（可按需扩展）
+        2. 货币前缀后可有空格
+        3. 剩余部分只能由数字、逗号、点组成
+    """
     s = s.strip()
-    # 如果包含任何英文字母，则不是价格字符串
-    if re.search(r'[a-zA-Z]', s):
-        return False
-    return True
+
+    # 正则：可选货币前缀 + 数字（允许逗号/小数点分隔）
+    pattern = re.compile(
+        r'''
+        ^                       # 开头
+        (?:                     # --- 可选货币前缀 ---
+            [\$¥€£]|            # 符号
+            (?:Rp|RM|IDR)       # 缩写（按需增删）
+        )?                      
+        \s*                     # 前缀后可有空格
+        [\d.,]+                 # 金额主体：数字/逗号/点
+        $                       # 结尾
+        ''', re.VERBOSE | re.IGNORECASE
+    )
+
+    return bool(pattern.match(s))
 
 def process_q1_image(image, valid_line):
         img = image.copy()
