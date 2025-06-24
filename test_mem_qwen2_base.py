@@ -31,11 +31,11 @@ SYSTEM_MESSAGE = "You are a helpful assistant."
 MULTIMODAL_KEYWORDS = ["pixel_values", "image_grid_thw", "video_grid_thw", "pixel_values_videos", "second_per_grid_ts"]
 
 jsonl_file_path = './lora_data_origin.json'
-image_folder = "/home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/origin/train" # 测试mem时用filter文件夹
+image_folder = "/home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/q1/train" # 测试mem时用filter文件夹
 
 # === 路径配置 ===
 base_model_id = "Qwen/Qwen2-VL-2B"
-adapter_dir = "./output/testing_lora"
+adapter_dir = "/home/yuhong_wang/storage/output/testing_lora"
 image_path = "./v2/images/origin/train/1.png"
 
 # === 加载模型 + LoRA ===
@@ -105,6 +105,7 @@ def model_inference(image_path,question):
         output_text = extract_assistant_answer(output_text)
 
     print("模型输出：", output_text)
+    return output_text
 
 
 if __name__ == "__main__":
