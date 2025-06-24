@@ -189,6 +189,7 @@ def train():
 
     processor = AutoProcessor.from_pretrained(model_args.model_id)
     processor.tokenizer.padding_side = "left" # 设置 side
+    processor.tokenizer.pad_token = processor.tokenizer.eos_token
 
     # model.config.tokenizer_model_max_length = processor.tokenizer.model_max_length
     def compute_metrics(eval_preds):

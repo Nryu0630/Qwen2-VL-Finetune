@@ -14,10 +14,27 @@ def extract_assistant_answer(text: str) -> str:
         return text.split("assistant\n", 1)[1].strip()
     return text.strip()
 
+def safe_resize(img: Image.Image, shortest_edge=448, longest_edge=672) -> Image.Image:
+    w, h = img.size
+    # 第一步：按短边缩放
+    scale1 = shortest_edge / min(w, h)
+    new_w, new_h = int(w * scale1), int(h * scale1)
+
+    # 第二步：如果长边超出限制，再整体缩放
+    if max(new_w, new_h) > longest_edge:
+        scale2 = longest_edge / max(new_w, new_h)
+        new_w, new_h = int(new_w * scale2), int(new_h * scale2)
+
+    # 防止为 0
+    new_w = max(1, new_w)
+    new_h = max(1, new_h)
+
+    return img.resize((new_w, new_h), Image.BICUBIC)
+
 # ===== 路径 =====
 base_model_id = "Qwen/Qwen2.5-VL-3B-Instruct"      # 你的基座模型（跟训练时 --model_id 一样）
-adapter_dir   = "./output/testing_lora"  # lora folder
-image_folder = "/home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/q1/train" # 测试mem时用filter文件夹
+adapter_dir   = "./output_10epochs_and_eval/testing_lora"  # lora folder
+image_folder = "/home/yuhong_wang/projects/VLM_Memorization/Qwen2-VL-Finetune/v2/images/origin/train" # 测试mem时用filter文件夹
 jsonl_file_path = './lora_data_origin.json'
 
 # 1) 基座模型先 load（可用 bfloat16/fp16 加速）
@@ -54,10 +71,14 @@ message = [
 with open(jsonl_file_path, "r", encoding="utf-8") as f:
     data = json.load(f)  # 直接解析文件内容
 
+total = len(data)
+correct = 0
+
 for qa in data:
-    image_path = image_folder + qa['image']
+    image_path = image_folder + '/' + qa['image']
     answer = qa['conversations'][1]['value']
     img = Image.open(image_path).convert("RGB")
+    img = safe_resize(img)
     message = [
         {
             "role": "user",
@@ -81,4 +102,8 @@ for qa in data:
                                     max_new_tokens=64,
                                     do_sample=False)
         result = extract_assistant_answer(processor.batch_decode(generated_ids, skip_special_tokens=True)[0])
-        print("模型输出：", result)
+        if answer==result:
+           correct+=1
+        print("模型输出：", result, answer==result)
+
+print('mem_rate:',float(correct/total))

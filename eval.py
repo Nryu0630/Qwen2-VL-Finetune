@@ -8,7 +8,7 @@ from PIL import Image
 
 # ===== 路径 =====
 base_model_id = "Qwen/Qwen2.5-VL-3B-Instruct"      # 你的基座模型（跟训练时 --model_id 一样）
-adapter_dir   = "./output/testing_lora"  # 上图文件夹
+adapter_dir   = "./output_10epochs_and_eval/testing_lora"  # 上图文件夹
 
 # 1) 基座模型先 load（可用 bfloat16/fp16 加速）
 base_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
@@ -32,7 +32,7 @@ processor = AutoProcessor.from_pretrained(adapter_dir)
 
 # ===== 准备一条验证样例 =====
 sample = {
-    "image": "./v2/images/origin/validation/1.png",
+    "image": "./v2/images/origin/train/1.png",
     "text" : "<image>What is the total amount on this invoice in the image?"
 }
 

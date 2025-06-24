@@ -106,6 +106,12 @@ class SupervisedDataset(Dataset):
             videos=None
 
         sources = copy.deepcopy(llava_to_openai(sources['conversations'], is_video=is_video))
+        
+#        print(f"Training example {i}:")
+#        print(f"Number of conversation turns: {len(sources)}")
+#        print(f"Conversation roles: {[s['role'] for s in sources]}")
+#        print(f"Range for processing: {list(range(0, len(sources), 2))}")
+#        print("-" * 30)
 
         all_input_ids = [] 
         all_labels = []
