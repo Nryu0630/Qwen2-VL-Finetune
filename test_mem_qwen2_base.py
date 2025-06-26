@@ -83,10 +83,10 @@ def model_inference(image_path,question):
     # === 图像处理 ===
     image = get_image_info(
         image_path=image_path,
-        min_pixel=0,
-        max_pixel=512 * 512,
-        width=448,
-        height=448
+        min_pixel=256 * 28 * 28,
+        max_pixel=1280 * 28 * 28,
+        width=None,
+        height=None
     )
 
     # === 编码输入 ===

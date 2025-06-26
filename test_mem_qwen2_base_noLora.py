@@ -68,7 +68,13 @@ def model_inference(image_path, question):
              f"{DEFAULT_IM_START_TOKEN}user\n{DEFAULT_IMAGE_TOKEN}{question}{DEFAULT_IM_END_TOKEN}\n" + \
              f"{DEFAULT_IM_START_TOKEN}assistant\n"
 
-    image = get_image_info(image_path, 0, 512 * 512, 448, 448)
+    image = get_image_info(
+        image_path=image_path,
+        min_pixel=256 * 28 * 28,
+        max_pixel=1280 * 28 * 28,
+        width=None,
+        height=None
+    )
 
     inputs = processor(
         text=[prompt],

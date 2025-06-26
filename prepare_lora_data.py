@@ -78,3 +78,27 @@ print(len(val))
 json_str = json.dumps(val, indent=4, ensure_ascii=False)
 with open(VAL_OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(json_str)
+
+
+# prepare memory test data
+mem_data = []
+for qa in train_data:
+    item = {}
+    item['id'] = qa['image_id']
+    item['origin_image_path'] = qa['origin_image_path']
+    item['masked_image_path'] = qa['q1_filter_image_path']
+
+    question = qa['qa_pairs'][0]['question']
+    answer = qa['qa_pairs'][0]['answer']
+
+    if (not answer) or isinstance(answer, list):
+        continue
+    item['question'] = question
+    item['answer'] = answer
+    mem_data.append(item)
+    
+json_str = json.dumps(mem_data, indent=4, ensure_ascii=False)
+with open('./mem_test_data.json', "w", encoding="utf-8") as f:
+    f.write(json_str)
+
+
