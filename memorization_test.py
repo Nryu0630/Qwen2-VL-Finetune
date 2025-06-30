@@ -24,7 +24,7 @@ from fuzzywuzzy import fuzz
 import pandas as pd
 from tqdm import tqdm
 import argparse
-from qwen_vl_utils import process_vision_info  # 关键点：你需要确保这是你训练时用的版本
+from qwen_vl_utils import process_vision_info  # qwen-vl-utils            0.0.11
 
 DEFAULT_IM_START_TOKEN = "<|im_start|>"
 DEFAULT_IM_END_TOKEN = "<|im_end|>"
@@ -402,7 +402,7 @@ class MemorizationTester:
 def main():
     parser = argparse.ArgumentParser(description="Test memorization on fine-tuned model")
     parser.add_argument("--base_model", default="Qwen/Qwen2-VL-2B", help="Base model ID")
-    parser.add_argument("--lora_adapter", default="/home/yuhong_wang/storage/output/testing_lora_qwen2_base_20epochs", help="LoRA adapter path")
+    parser.add_argument("--lora_adapter", default="/home/yuhong_wang/storage/output/testing_lora", help="LoRA adapter path")
     parser.add_argument("--test_data", default="./mem_test_data.json", help="Test data path")
     parser.add_argument("--output", default="memorization_results.jsonl", help="Output results path")
     parser.add_argument("--max_samples", type=int, default=None, help="Maximum number of samples to test")

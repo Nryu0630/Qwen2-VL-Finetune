@@ -54,6 +54,8 @@ def get_image_info(image_path, min_pixel, max_pixel, width, height):
         content["resized_height"] = height
     messages = [{"role": "user", "content": [content]}]
     image_input, _ = process_vision_info(messages)
+#    print("=======================")
+#    print("image_input:",image_input)
     return image_input[0]
 
 # Disable torch compilation to avoid dynamo issues
@@ -117,12 +119,19 @@ class ModalityAttentionAnalyzer:
                 do_resize=False,
                 return_tensors="pt"
             )
+            
+#            if 'pixel_values' in inputs:
+#                pixel_values = inputs['pixel_values']
+#                print(f"Pixel values shape: {pixel_values.shape}")
+#                print(f"Pixel values mean: {pixel_values.mean().item():.4f}, std: {pixel_values.std().item():.4f}")
+                
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
             # Forward pass to get attention (without generation for now)
             with torch.no_grad():
                 outputs = self.model(**inputs, output_attentions=True)
                 attentions = outputs.attentions  # This should work with eager attention
+#                print("attentions:",attentions)
                 
                 # Simple generation without attention output to avoid conflicts
                 generated = self.model.generate(
@@ -177,12 +186,16 @@ class ModalityAttentionAnalyzer:
             
             # Find memorized tokens in generated text
             memorized_tokens = self.find_memorized_tokens(generated_text, target_answer)
+            print("memorized_tokens:",memorized_tokens)
             if not memorized_tokens:
                 print("No memorized tokens found")
                 return None
             
             # Identify modality boundaries in input tokens
             image_token_count, text_start_idx = self.find_modality_boundaries(input_tokens)
+            print("image_token_count:",image_token_count)
+            print("text_start_idx:",text_start_idx)
+            print("total len:",len(input_tokens))
             
             # Average attention across layers and heads
             # attentions is a tuple of (batch_size, num_heads, seq_len, seq_len) tensors
@@ -251,6 +264,7 @@ class ModalityAttentionAnalyzer:
     def find_modality_boundaries(self, input_tokens):
         """Find where image tokens end and text tokens begin"""
         # Look for patterns that indicate the boundary
+        print("input_tokens", input_tokens)
         text_start_idx = len(input_tokens)  # Default to end
         image_token_count = 0
         
@@ -304,7 +318,10 @@ class ModalityAttentionAnalyzer:
         for sample in tqdm(memorized_samples, desc="Analyzing modality attention"):
             try:
                 sample_id = sample['sample_id']
-                masked_image_path = sample['masked_image_path']
+                masked_image_path = sample['masked_image_path'].replace("q1","origin")
+#                masked_image_path = sample['masked_image_path']
+                print("masked_image_path",masked_image_path)
+#                question = "Please descirbe this image."
                 question = sample['question']
                 target_answer = sample['target_answer']
                 token_f1 = sample['token_f1']
@@ -313,11 +330,13 @@ class ModalityAttentionAnalyzer:
                 
                 # Generate with attention
                 attention_data = self.generate_and_get_attention(masked_image_path, question)
+#                print("attention_data",attention_data)
                 if not attention_data:
                     continue
                 
                 # Extract modality attention
                 modality_attention = self.extract_modality_attention(attention_data, target_answer)
+                print("modality_attention",modality_attention)
                 if not modality_attention:
                     continue
                 
@@ -452,7 +471,7 @@ def main():
     
     parser = argparse.ArgumentParser(description="Analyze attention distribution between modalities")
     parser.add_argument("--base_model", default="Qwen/Qwen2-VL-2B", help="Base model ID")
-    parser.add_argument("--lora_adapter", default="/home/yuhong_wang/storage/output/testing_lora_qwen2_base_20epochs", help="LoRA adapter path")
+    parser.add_argument("--lora_adapter", default="/home/yuhong_wang/storage/output/testing_lora", help="LoRA adapter path")
     parser.add_argument("--results_file", default="memorization_results.jsonl", help="Memorization results file")
     parser.add_argument("--threshold", type=float, default=0.15, help="Memorization threshold")
     parser.add_argument("--max_samples", type=int, default=10, help="Maximum samples to analyze")
